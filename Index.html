@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Car Price Predictor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #f0f2f5;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .spinner-border {
+      display: none;
+    }
+    #result {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card p-4">
+        <h4 class="mb-4">🚗 Predict Your Car's Price</h4>
+        <form id="predictForm">
+          <div class="mb-3">
+            <label class="form-label">Company</label>
+            <select class="form-select" name="company" required>
+              {% for c in companies %}
+                <option value="{{ c }}">{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Model</label>
+            <select class="form-select" name="car_models" required>
+              {% for m in car_models %}
+                <option value="{{ m }}">{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Year</label>
+            <select class="form-select" name="year" required>
+              {% for y in years %}
+                <option value="{{ y }}">{{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Fuel Type</label>
+            <select class="form-select" name="fuel_type" required>
+              {% for f in fuel_types %}
+                <option value="{{ f }}">{{ f }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Kilometers Driven</label>
+            <input type="number" class="form-control" name="kilo_driven" placeholder="e.g. 45000" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Predict</button>
+          <div class="text-center mt-3">
+            <div class="spinner-border text-primary" role="status" id="loadingSpinner"></div>
+          </div>
+        </form>
+        <div id="result" class="text-center text-success"></div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-4">
+        <h5 class="mb-3">📈 Price Trends by Year</h5>
+        <canvas id="priceChart" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('predictForm');
+  const resultBox = document.getElementById('result');
+  const spinner = document.getElementById('loadingSpinner');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    spinner.style.display = 'inline-block';
+    resultBox.textContent = '';
+
+    const formData = new FormData(form);
+    const response = await fetch('/predict', {
+      method: 'POST',
+      body: formData
+    });
+    const price = await response.text();
+    spinner.style.display = 'none';
+    resultBox.textContent = `Estimated Price: ₹ ${price}`;
+  });
+
+  // Sample chart (replace with dynamic data if needed)
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [2020, 2021, 2022, 2023, 2024],
+      datasets: [{
+        label: 'Avg Price (₹)',
+        data: [450000, 470000, 490000, 510000, 530000],
+        borderColor: '#007bff',
+        fill: false,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+</script>
+</body>
+</html>
