@@ -3,128 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <title>Car Price Predictor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
-      background-color: #f0f2f5;
-    }
-    .card {
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .spinner-border {
-      display: none;
-    }
-    #result {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-top: 20px;
+      background-color: #f8fafc;
+      font-family: 'Inter', sans-serif;
     }
   </style>
 </head>
-<body>
-<div class="container py-5">
-  <div class="row g-4">
-    <div class="col-md-6">
-      <div class="card p-4">
-        <h4 class="mb-4">🚗 Predict Your Car's Price</h4>
-        <form id="predictForm">
-          <div class="mb-3">
-            <label class="form-label">Company</label>
-            <select class="form-select" name="company" required>
-              {% for c in companies %}
-                <option value="{{ c }}">{{ c }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Model</label>
-            <select class="form-select" name="car_models" required>
-              {% for m in car_models %}
-                <option value="{{ m }}">{{ m }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Year</label>
-            <select class="form-select" name="year" required>
-              {% for y in years %}
-                <option value="{{ y }}">{{ y }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Fuel Type</label>
-            <select class="form-select" name="fuel_type" required>
-              {% for f in fuel_types %}
-                <option value="{{ f }}">{{ f }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Kilometers Driven</label>
-            <input type="number" class="form-control" name="kilo_driven" placeholder="e.g. 45000" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Predict</button>
-          <div class="text-center mt-3">
-            <div class="spinner-border text-primary" role="status" id="loadingSpinner"></div>
-          </div>
-        </form>
-        <div id="result" class="text-center text-success"></div>
-      </div>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+
+  <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Left Card -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+        🚗 Predict Your Car's Price
+      </h2>
+
+      <form id="predictForm" class="space-y-4">
+        <div>
+          <label class="block text-gray-600 font-medium mb-1">Company</label>
+          <select name="company" required class="w-full border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400">
+            {% for c in companies %}
+              <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-600 font-medium mb-1">Model</label>
+          <select name="car_models" required class="w-full border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400">
+            {% for m in car_models %}
+              <option value="{{ m }}">{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-600 font-medium mb-1">Year</label>
+          <select name="year" required class="w-full border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400">
+            {% for y in years %}
+              <option value="{{ y }}">{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-600 font-medium mb-1">Fuel Type</label>
+          <select name="fuel_type" required class="w-full border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400">
+            {% for f in fuel_types %}
+              <option value="{{ f }}">{{ f }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-600 font-medium mb-1">Kilometers Driven</label>
+          <input type="number" name="kilo_driven" placeholder="e.g. 45000" required 
+                 class="w-full border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-400">
+        </div>
+
+        <button type="submit" 
+                class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-all">
+          Predict
+        </button>
+
+        <div class="flex justify-center mt-4">
+          <div class="hidden border-4 border-indigo-600 border-t-transparent rounded-full w-8 h-8 animate-spin" id="loadingSpinner"></div>
+        </div>
+      </form>
+
+      <div id="result" class="text-center text-green-600 font-bold text-lg mt-4"></div>
     </div>
-    <div class="col-md-6">
-      <div class="card p-4">
-        <h5 class="mb-3">📈 Price Trends by Year</h5>
-        <canvas id="priceChart" height="300"></canvas>
-      </div>
+
+    <!-- Right Card -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-3">📈 Price Trends by Year</h3>
+      <canvas id="priceChart" height="280"></canvas>
     </div>
   </div>
-</div>
 
-<script>
-  const form = document.getElementById('predictForm');
-  const resultBox = document.getElementById('result');
-  const spinner = document.getElementById('loadingSpinner');
+  <script>
+    const form = document.getElementById('predictForm');
+    const resultBox = document.getElementById('result');
+    const spinner = document.getElementById('loadingSpinner');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    spinner.style.display = 'inline-block';
-    resultBox.textContent = '';
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      spinner.classList.remove('hidden');
+      resultBox.textContent = '';
 
-    const formData = new FormData(form);
-    const response = await fetch('/predict', {
-      method: 'POST',
-      body: formData
+      const formData = new FormData(form);
+      const response = await fetch('/predict', {
+        method: 'POST',
+        body: formData
+      });
+      const price = await response.text();
+
+      spinner.classList.add('hidden');
+      resultBox.textContent = `Estimated Price: ₹ ${price}`;
     });
-    const price = await response.text();
-    spinner.style.display = 'none';
-    resultBox.textContent = `Estimated Price: ₹ ${price}`;
-  });
 
-  // Sample chart (replace with dynamic data if needed)
-  const ctx = document.getElementById('priceChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [2020, 2021, 2022, 2023, 2024],
-      datasets: [{
-        label: 'Avg Price (₹)',
-        data: [450000, 470000, 490000, 510000, 530000],
-        borderColor: '#007bff',
-        fill: false,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false }
+    // Chart.js Example
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [2020, 2021, 2022, 2023, 2024],
+        datasets: [{
+          label: 'Average Price (₹)',
+          data: [450000, 470000, 490000, 510000, 530000],
+          borderColor: '#4f46e5',
+          backgroundColor: 'rgba(79,70,229,0.1)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: false }
+        }
       }
-    }
-  });
-</script>
+    });
+  </script>
+
 </body>
 </html>
